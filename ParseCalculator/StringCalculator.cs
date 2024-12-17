@@ -14,6 +14,7 @@ namespace ParseCalculator
         public string Calculate()
         {
             string postfixString = ParseExpression.GetPostfixExpression(_expression);
+            if (postfixString.Contains("Exceptions")) return "Неизвестный символ!";
             return CalculatePostfixString(postfixString).ToString();
         }
 

@@ -12,6 +12,8 @@ namespace ParseCalculator
 
         public static string GetPostfixExpression(string input)
         {
+            if(input == string.Empty) throw new InvalidOperationException($"Пустое выражение!");
+
             string output = string.Empty; //Строка для хранения выражения
             Stack<char> operStack = new Stack<char>(); //Стек для хранения операторов
 
@@ -62,6 +64,10 @@ namespace ParseCalculator
                         operStack.Push(char.Parse(input[i].ToString())); //Если стек пуст, или же приоритет оператора выше - добавляем операторов на вершину стека
 
                     }
+                }
+                if(!IsDelimeter(input[i]) && !IsOperator(input[i]) && !Char.IsDigit(input[i]))
+                {
+                    throw new InvalidOperationException($"Неизвестный символ {input[i]}");
                 }
             }
 
