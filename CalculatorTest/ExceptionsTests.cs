@@ -16,23 +16,15 @@ namespace CalculatorTest
         [InlineData("((2+2)*2))")]
         [InlineData(")(2*2)(")]
         [InlineData("(34*23+5)((3+5)(+4)")]
-        public void BracketExceptions(string expression)
-        {
-            var calculator = new StringCalculator(expression);
-
-            Assert.Throws<InvalidOperationException>(() => calculator.Calculate());
-        }
+        public void BracketExceptions(string expression) => TrowInvalidOperationException(expression);
+        
 
         [Theory]
         [InlineData("2 + 3 ? 5")]
         [InlineData("4*3 + 5 * g4")]
         [InlineData("3 % 4")]
-        public void UnsupportedOperation(string expression)
-        {
-            var calculator = new StringCalculator(expression);
-
-            Assert.Throws<InvalidOperationException>(() => calculator.Calculate());
-        }
+        public void UnsupportedOperation(string expression) => TrowInvalidOperationException(expression);
+        
 
         [Fact]
         public void DivisionByZero()
@@ -43,19 +35,13 @@ namespace CalculatorTest
         }
 
         [Fact]
-        public void EmptyExpression()
-        {
-            var calculator = new StringCalculator("");
-
-            Assert.Throws<InvalidOperationException>(() => calculator.Calculate());
-        }
+        public void EmptyExpression() => TrowInvalidOperationException("");
+        
 
         [Fact]
-        public void InvalidExpression()
-        {
-            var calculator = new StringCalculator("5 + + 4");
+        public void InvalidExpression() => TrowInvalidOperationException("5 + + 4");
+        
 
-            Assert.Throws<InvalidOperationException>(() => calculator.Calculate());
-        }
+        private void TrowInvalidOperationException(string exception) => Assert.Throws<InvalidOperationException>(() => new StringCalculator(exception).Calculate());
     }
 }
