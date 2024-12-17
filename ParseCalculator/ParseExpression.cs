@@ -6,9 +6,8 @@ using System.Threading.Tasks;
 
 namespace ParseCalculator
 {
-    public class ParseExpression(string expression)
+    public class ParseExpression()
     {
-        private string _expression = expression;
 
         public static string GetPostfixExpression(string input)
         {
@@ -78,17 +77,11 @@ namespace ParseCalculator
             return output; //Возвращаем выражение в постфиксной записи
         }
 
-        static public bool IsOperator(char с)
-        {
-            if (("+-/*^()".Contains(с))) return true;
-            return false;
-        }
+        static public bool IsOperator(char с) => "+-/*^()".Contains(с);
 
-        static public bool IsDelimeter(char c)
-        {
-            if ((" =".Contains(c))) return true;
-            return false;
-        }
+
+        static public bool IsDelimeter(char c) => " =".Contains(c);
+       
 
         static private byte GetPriority(char s)
         {

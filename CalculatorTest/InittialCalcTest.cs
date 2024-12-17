@@ -23,13 +23,8 @@ namespace CalculatorTest
         [InlineData("10*20-400", "-200")]
         public void CalculateTwoOperationWithThreeNumbers(string expression, string result) => Check(expression, result);
 
-        private void Check(string expression, string result)
-        {
-            var calculator = new StringCalculator(expression);
+        private void Check(string expression, string result) => Assert.Equal(result, new StringCalculator(expression).Calculate());
 
-            Assert.Equal(result, calculator.Calculate());
-        }
 
-        
     }
 }

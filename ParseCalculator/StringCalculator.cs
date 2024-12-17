@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,7 +15,7 @@ namespace ParseCalculator
         public string Calculate()
         {
             string postfixString = ParseExpression.GetPostfixExpression(_expression);
-            if (postfixString.Contains("Exceptions")) return "Неизвестный символ!";
+            
             return CalculatePostfixString(postfixString).ToString();
         }
 
@@ -50,7 +51,7 @@ namespace ParseCalculator
                         case '+': result = b + a; break;
                         case '-': result = b - a; break;
                         case '*': result = b * a; break;
-                        case '/': result = b / a; break;
+                        case '/': result = (a != 0) ? b / a : throw new DivideByZeroException("Деление на ноль!"); break;
                         case '^': result = double.Parse(Math.Pow(double.Parse(b.ToString()), double.Parse(a.ToString())).ToString()); break;
                     }
                     temp.Push(result); //Результат вычисления записываем обратно в стек
