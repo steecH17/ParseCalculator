@@ -8,16 +8,23 @@ namespace ParseCalculator
 {
     public class ParseExpression()
     {
-
+        // - 4 + 5 => 4 ~ 5 +
+        // -(7 + 8) => 7 8 + !
+        //2 * (5 + 4) => 2 5 4 + *
+        //-4+5-9 => ~4+5-9
         public static string GetPostfixExpression(string input)
         {
             if(input == string.Empty) throw new InvalidOperationException($"Пустое выражение!");
+            if ("+-/*".Contains(input[0]) || "+-/*".Contains(input[^1])) throw new InvalidOperationException($"Некорректное выражение!");
 
             string output = string.Empty; //Строка для хранения выражения
             Stack<char> operStack = new Stack<char>(); //Стек для хранения операторов
+            char s;
+            char previousToken = '\0';
 
             for (int i = 0; i < input.Length; i++) //Для каждого символа в входной строке
             {
+
                 //Разделители пропускаем
                 if (IsDelimeter(input[i]))
                     continue; //Переходим к следующему символу
@@ -41,17 +48,24 @@ namespace ParseCalculator
                 //Если символ - оператор
                 if (IsOperator(input[i])) //Если оператор
                 {
-                    if (input[i] == '(') //Если символ - открывающая скобка
+                    if (input[i] == '(')
+                    {
+                        if(previousToken == ')') throw new InvalidOperationException("Некорректное выражение!");
+                        //Если символ - открывающая скобка
                         operStack.Push(input[i]); //Записываем её в стек
+                    }
                     else if (input[i] == ')') //Если символ - закрывающая скобка
                     {
+                        if (previousToken == '(') throw new InvalidOperationException("Некорректное выражение!");
                         //Выписываем все операторы до открывающей скобки в строку
-                        char s = operStack.Pop();
+                        if (operStack.TryPop(out char symbol)) s = symbol;
+                        else throw new InvalidOperationException("Некорректное выражение! Несбалансированные скобки!");
 
                         while (s != '(')
                         {
                             output += s.ToString() + ' ';
-                            s = operStack.Pop();
+                            if (operStack.TryPop(out symbol)) s = symbol;
+                            else throw new InvalidOperationException("Некорректное выражение! Несбалансированные скобки!");
                         }
                     }
                     else //Если любой другой оператор
@@ -68,8 +82,12 @@ namespace ParseCalculator
                 {
                     throw new InvalidOperationException($"Неизвестный символ {input[i]}");
                 }
+
+                previousToken = input[i];
             }
 
+            if(operStack.Contains('(')) throw new InvalidOperationException("Некорректное выражение! Несбалансированные скобки!");
+            
             //Когда прошли по всем символам, выкидываем из стека все оставшиеся там операторы в строку
             while (operStack.Count > 0)
                 output += operStack.Pop() + " ";
@@ -77,7 +95,7 @@ namespace ParseCalculator
             return output; //Возвращаем выражение в постфиксной записи
         }
 
-        static public bool IsOperator(char с) => "+-/*^()".Contains(с);
+        static public bool IsOperator(char с) => "+-/*()~".Contains(с);
 
 
         static public bool IsDelimeter(char c) => " =".Contains(c);
@@ -85,17 +103,17 @@ namespace ParseCalculator
 
         static private byte GetPriority(char s)
         {
-            switch (s)
+            return s switch
             {
-                case '(': return 0;
-                case ')': return 1;
-                case '+': return 2;
-                case '-': return 3;
-                case '*': return 4;
-                case '/': return 4;
-                case '^': return 5;
-                default: return 6;
-            }
+                '(' => 0,
+                ')' => 1,
+                '+' => 2,
+                '-' => 3,
+                '*' => 4,
+                '/' => 4,
+                '~' => 5,
+                _ => 6,
+            };
         }
     }
 }

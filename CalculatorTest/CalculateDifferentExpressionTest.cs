@@ -30,7 +30,15 @@ namespace CalculatorTest
         [InlineData("4,35 * 2,2 + 10/4", "12,07")]
         [InlineData("20,5/4,1", "5")]
         public void FractionalNumbersTest(string expression, string result) => Check(expression, result);
-        
+
+        [Theory]
+        [InlineData("-4", "-4")]
+        [InlineData("-(-1 + 2)", "-1")]
+        [InlineData("(10*3 + 5) + (-10 + 5)", "30")]
+        [InlineData("-(7+11)", "-18")]
+        [InlineData("5-3", "2")]
+        public void UnaryMinusTest(string expression, string result) => Check(expression, result);
+
 
         private void Check(string expression, string result)
         {

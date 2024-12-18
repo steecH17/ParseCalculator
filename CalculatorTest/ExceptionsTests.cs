@@ -15,6 +15,8 @@ namespace CalculatorTest
         [InlineData("4*((10/2)")]
         [InlineData("((2+2)*2))")]
         [InlineData(")(2*2)(")]
+        [InlineData("()(2*2)")]
+        [InlineData("(2*2)()")]
         [InlineData("(34*23+5)((3+5)(+4)")]
         public void BracketExceptions(string expression) => TrowInvalidOperationException(expression);
         
@@ -36,10 +38,13 @@ namespace CalculatorTest
 
         [Fact]
         public void EmptyExpression() => TrowInvalidOperationException("");
-        
 
-        [Fact]
-        public void InvalidExpression() => TrowInvalidOperationException("5 + + 4");
+
+        [Theory]
+        [InlineData("+ 2 + 2")]
+        [InlineData("2 + 2 +")]
+        [InlineData("2 * + 2")]
+        public void InvalidExpression(string expression) => TrowInvalidOperationException(expression);
         
 
         private void TrowInvalidOperationException(string exception) => Assert.Throws<InvalidOperationException>(() => new StringCalculator(exception).Calculate());
