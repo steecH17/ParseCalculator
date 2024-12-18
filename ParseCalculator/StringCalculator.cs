@@ -17,93 +17,62 @@ namespace ParseCalculator
         {
             string postfixString = ParseExpression.GetPostfixExpression(UnaryMinusParser.Parse(_expression));
             
-
             return CalculatePostfixString(postfixString).ToString();
         }
 
-        public double CalculatePostfixString(string input)
+        private double CalculatePostfixString(string input)
         {
-            double result = 0; //Результат
-            Stack<double> temp = new Stack<double>(); //Временный стек для решения
+            double result = 0; 
+            Stack<double> tempStorage = new Stack<double>(); 
 
-            for (int i = 0; i < input.Length; i++) //Для каждого символа в строке
+            for (int i = 0; i < input.Length; i++) 
             {
-                //Если символ - цифра, то читаем все число и записываем на вершину стека
+                
                 if (Char.IsDigit(input[i]))
                 {
-                    string a = string.Empty;
+                    string currentNum = string.Empty;
 
-                    while (!ParseExpression.IsDelimeter(input[i]) && !ParseExpression.IsOperator(input[i]) && input[i]!='~') //Пока не разделитель
+                    while (!ParseExpression.IsDelimeter(input[i]) && !ParseExpression.IsOperator(input[i]) && input[i]!='~') 
                     {
-                        a += input[i]; //Добавляем
+                        currentNum += input[i];
                         i++;
                         if (i == input.Length) break;
                     }
-                    temp.Push(double.Parse(a)); //Записываем в стек
+
+                    tempStorage.Push(double.Parse(currentNum)); 
                     i--;
                 }
-                else if (ParseExpression.IsOperator(input[i])) //Если символ - оператор
+                else if (ParseExpression.IsOperator(input[i])) 
                 {
                     if (input[i] == '~')
                     {
-                        double a = temp.Pop();
-                        result = a * (-1);
+                        result = (tempStorage.TryPop(out double element)) ? element * (-1) : throw new InvalidOperationException("Стэк переполнен!"); 
                     }
                     else
                     {
-                        //Берем два последних значения из стека
-                        double a = temp.Pop();
-                        double b = temp.Pop();
+                        double num1 = (tempStorage.TryPop(out double element)) ? element : throw new InvalidOperationException("Стэк переполнен!");
+                        double num2 = (tempStorage.TryPop(out element)) ? element : throw new InvalidOperationException("Стэк переполнен!");
 
-                        switch (input[i]) //И производим над ними действие, согласно оператору
-                        {
-                            case '+': result = b + a; break;
-                            case '-': result = b - a; break;
-                            case '*': result = b * a; break;
-                            case '/': result = (a != 0) ? b / a : throw new DivideByZeroException("Деление на ноль!"); break;
-                            case '^': result = double.Parse(Math.Pow(double.Parse(b.ToString()), double.Parse(a.ToString())).ToString()); break;
-                            
-                        }
+                        result = CalculateSimpleExpression(num1, num2, input[i]);
                     }
-                    temp.Push(result); //Результат вычисления записываем обратно в стек
+                    tempStorage.Push(result); 
                 }
             }
-            return temp.Peek(); //Забираем результат всех вычислений из стека и возвращаем его
+
+            return tempStorage.Peek(); 
         }
 
-        public static string Evalute(string input)
-        {
-            //char previousToken = '\0';
+        private double CalculateSimpleExpression(double num1, double num2, char operation)
+            => operation switch
+            {
+                '+' => num2 + num1,
+                '-' => num2 - num1,
+                '*' => num2 * num1,
+                '/' => (num1 != 0) ? num2 / num1 : throw new DivideByZeroException("Деление на ноль!"),
+                _ => throw new InvalidOperationException($"Неизвестный символ {operation}")
+            };
+        
 
-            //for (int i = 0; i < input.Length; i++) //Для каждого символа в строке
-            //{
-            //    if (ParseExpression.IsDelimeter(input[i]))
-            //        continue;
-
-            //    if (char.IsDigit(input[i]) || input[i] == '(')
-            //    {
-            //        if(previousToken == '-')
-            //        {
-
-            //            input = input.Insert(i, "~");
-            //            //input = input.Remove(i);
-            //        }
-            //    }
-            //    previousToken = input[i];
-            //}
-            //return input;
-            string pattern = @"-(?<number>[0-9]+)";
-
-            // Замените каждый найденный унарный минус на "~"
-            string output = Regex.Replace(input, pattern, "~${number}");
-            return output;
-
-        }
-
-        public static string Evalute2(string input)
-        {
-            return Regex.Replace(input, @"(?<!\w)-(?=\s*\()", "~($1", RegexOptions.None);
-        }
 
     }
 }

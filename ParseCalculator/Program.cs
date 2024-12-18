@@ -8,9 +8,8 @@ class Program
     static void Main(string[] args)
     {
         string input = Console.ReadLine();
-        //Console.WriteLine(UnaryMinusParser.Parse(input));
         var calc = new StringCalculator(input);
-        //Console.WriteLine(ParseExpression.GetPostfixExpression(""));
+        Console.WriteLine(calc.Calculate());
         
         try
         {

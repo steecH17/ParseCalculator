@@ -8,73 +8,66 @@ namespace ParseCalculator
 {
     public class ParseExpression()
     {
-        // - 4 + 5 => 4 ~ 5 +
-        // -(7 + 8) => 7 8 + !
-        //2 * (5 + 4) => 2 5 4 + *
-        //-4+5-9 => ~4+5-9
+        
         public static string GetPostfixExpression(string input)
         {
+            //Проверка начальных ошибок
             if(input == string.Empty) throw new InvalidOperationException($"Пустое выражение!");
             if ("+-/*".Contains(input[0]) || "+-/*".Contains(input[^1])) throw new InvalidOperationException($"Некорректное выражение!");
 
-            string output = string.Empty; //Строка для хранения выражения
-            Stack<char> operStack = new Stack<char>(); //Стек для хранения операторов
-            char s;
+            string output = string.Empty;
+            Stack<char> operationStack = new Stack<char>(); 
+            char currentToken;
             char previousToken = '\0';
 
-            for (int i = 0; i < input.Length; i++) //Для каждого символа в входной строке
+            for (int i = 0; i < input.Length; i++) 
             {
-
-                //Разделители пропускаем
                 if (IsDelimeter(input[i]))
-                    continue; //Переходим к следующему символу
+                    continue; 
 
-                //Если символ - цифра, то считываем все число
-                if (Char.IsDigit(input[i])) //Если цифра
+                
+                if (Char.IsDigit(input[i])) 
                 {
-                    //Читаем до разделителя или оператора, что бы получить число
+                    
                     while (!IsDelimeter(input[i]) && !IsOperator(input[i]))
                     {
-                        output += input[i]; //Добавляем каждую цифру числа к нашей строке
-                        i++; //Переходим к следующему символу
+                        output += input[i];
+                        i++; 
 
-                        if (i == input.Length) break; //Если символ - последний, то выходим из цикла
+                        if (i == input.Length) break; 
                     }
 
-                    output += " "; //Дописываем после числа пробел в строку с выражением
-                    i--; //Возвращаемся на один символ назад, к символу перед разделителем
+                    output += " "; 
+                    i--; 
                 }
 
-                //Если символ - оператор
-                if (IsOperator(input[i])) //Если оператор
+                
+                if (IsOperator(input[i])) 
                 {
                     if (input[i] == '(')
                     {
                         if(previousToken == ')') throw new InvalidOperationException("Некорректное выражение!");
-                        //Если символ - открывающая скобка
-                        operStack.Push(input[i]); //Записываем её в стек
+                        
+                        operationStack.Push(input[i]); 
                     }
-                    else if (input[i] == ')') //Если символ - закрывающая скобка
+                    else if (input[i] == ')') 
                     {
                         if (previousToken == '(') throw new InvalidOperationException("Некорректное выражение!");
-                        //Выписываем все операторы до открывающей скобки в строку
-                        if (operStack.TryPop(out char symbol)) s = symbol;
-                        else throw new InvalidOperationException("Некорректное выражение! Несбалансированные скобки!");
 
-                        while (s != '(')
+                        currentToken = (operationStack.TryPop(out char symbol)) ? symbol : throw new InvalidOperationException("Некорректное выражение! Несбалансированные скобки!");
+                        
+                        while (currentToken != '(')
                         {
-                            output += s.ToString() + ' ';
-                            if (operStack.TryPop(out symbol)) s = symbol;
-                            else throw new InvalidOperationException("Некорректное выражение! Несбалансированные скобки!");
+                            output += currentToken.ToString() + ' ';
+                            currentToken = (operationStack.TryPop(out symbol)) ? symbol : throw new InvalidOperationException("Некорректное выражение! Несбалансированные скобки!"); ;
                         }
                     }
-                    else //Если любой другой оператор
+                    else 
                     {
-                        if (operStack.Count > 0) //Если в стеке есть элементы
-                            if (GetPriority(input[i]) <= GetPriority(operStack.Peek())) //И если приоритет нашего оператора меньше или равен приоритету оператора на вершине стека
-                                output += operStack.Pop().ToString() + " "; //То добавляем последний оператор из стека в строку с выражением
+                        if (operationStack.Count > 0 && GetPriority(input[i]) <= GetPriority(operationStack.Peek())) 
+                                output += operationStack.Pop().ToString() + " "; 
 
-                        operStack.Push(char.Parse(input[i].ToString())); //Если стек пуст, или же приоритет оператора выше - добавляем операторов на вершину стека
+                        operationStack.Push(char.Parse(input[i].ToString())); 
 
                     }
                 }
@@ -86,21 +79,20 @@ namespace ParseCalculator
                 previousToken = input[i];
             }
 
-            if(operStack.Contains('(')) throw new InvalidOperationException("Некорректное выражение! Несбалансированные скобки!");
+            if(operationStack.Contains('(')) throw new InvalidOperationException("Некорректное выражение! Несбалансированные скобки!");
             
-            //Когда прошли по всем символам, выкидываем из стека все оставшиеся там операторы в строку
-            while (operStack.Count > 0)
-                output += operStack.Pop() + " ";
+            
+            while (operationStack.Count > 0)
+                output += operationStack.Pop() + " ";
 
-            return output; //Возвращаем выражение в постфиксной записи
+            return output; 
         }
 
-        static public bool IsOperator(char с) => "+-/*()~".Contains(с);
+        static public bool IsOperator(char token) => "+-/*()~".Contains(token);
 
 
-        static public bool IsDelimeter(char c) => " =".Contains(c);
+        static public bool IsDelimeter(char token) => " =".Contains(token);
        
-
         static private byte GetPriority(char s)
         {
             return s switch

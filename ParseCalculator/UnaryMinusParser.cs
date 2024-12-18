@@ -9,6 +9,7 @@ namespace ParseCalculator
 {
     public class UnaryMinusParser
     {
+        //-5 => ~5
         public static string Parse(string expression)
         {
             List<Token> tokens = Lex(expression);
